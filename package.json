@@ -1,7 +1,6 @@
 {
   "name": "vite-plugin-auto-optimize-deps-include",
   "type": "module",
-  "private": true,
   "version": "1.0.0",
   "packageManager": "pnpm@10.5.2",
   "description": "",
@@ -31,9 +30,12 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
-    "release": "pnpm build && changeset && changeset version && changeset publish",
+    "release": "git add . && npx bumpp patch -y --commit --push --all --tag && npm publish --registry https://registry.npmjs.org",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -41,9 +43,9 @@
     "magic-string": "^0.30.17"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.28.1",
     "@djie/eslint-config": "^3.0.2",
     "@types/node": "^22.13.9",
+    "bumpp": "^10.0.3",
     "eslint": "^9.21.0",
     "nodemon": "^3.1.9",
     "tsup": "^8.4.0",
