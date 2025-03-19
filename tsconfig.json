@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
-    "jsx": "preserve",
     "target": "esnext",
+    "jsx": "preserve",
     "module": "esnext",
-    "esModuleInterop": true,
     "moduleResolution": "node",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   }
 }

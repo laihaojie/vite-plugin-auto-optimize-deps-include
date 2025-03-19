@@ -1,8 +1,8 @@
+import type { PluginOption } from 'vite'
 import fs from 'node:fs'
 import { resolve } from 'node:path'
-import MagicString from 'magic-string'
 import process from 'node:process'
-import { PluginOption } from 'vite'
+import MagicString from 'magic-string'
 
 interface Option {
   /**
@@ -12,8 +12,7 @@ interface Option {
   regex: RegExp
 }
 
-function VitePluginAutoOptimizeDepsInclude(option = {} as Option) : PluginOption {
-
+function VitePluginAutoOptimizeDepsInclude(option = {} as Option): PluginOption {
   return {
     name: 'update-optimizeDeps-include',
     apply: 'serve',
@@ -45,7 +44,7 @@ function VitePluginAutoOptimizeDepsInclude(option = {} as Option) : PluginOption
           const endIndex = current.index + startIndex
 
           // 去重 + 合并 根据长度排序
-          const newList = [...new Set([...currentList, ...list])].filter(Boolean).sort((a, b) => a.length - b.length)
+          const newList = [...new Set([...currentList, ...list])].filter(i => Boolean(i) && !i.startsWith('//')).sort((a, b) => a.length - b.length)
           const newStr = newList.reduce((pre, cur) => {
             return `${pre}${' '.repeat(indent + 2)}'${cur}',\n`
           }, '\n')

@@ -1,4 +1,3 @@
-
 <p align="center">
 自动更新 vite.config.ts 中的 optimizeDeps.include 配置项
 </p>
@@ -12,7 +11,6 @@
 pnpm install vite-plugin-auto-optimize-deps-include -D
 
 ```
-
 
 ## 🦄 使用
 
