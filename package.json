@@ -1,7 +1,7 @@
 {
   "name": "vite-plugin-auto-optimize-deps-include",
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "packageManager": "pnpm@10.6.4",
   "description": "",
   "author": "laihaojie",
@@ -51,5 +51,10 @@
     "tsup": "^8.4.0",
     "typescript": "^5.8.2",
     "vite": "^6.2.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }
