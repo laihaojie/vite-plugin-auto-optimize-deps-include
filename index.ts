@@ -15,15 +15,23 @@ interface Option {
    * @default vite.config.ts
    */
   configFile?: string
+  /**
+   * 标记 optimizeDeps.include 数组位置的注释
+   * 在 vite.config.ts 中，在 include: [...] 上方添加此注释即可被插件识别
+   * @default '// @auto-deps'
+   */
+  marker?: string
 }
 
 const DEFAULT_REGEX = /new dependencies optimized:(.*)\n/
+const DEFAULT_MARKER = '// @auto-deps'
 // eslint-disable-next-line no-control-regex
 const ANSI_REGEX = /\x1B\[[0-9;]*m/g
 
 function VitePluginAutoOptimizeDepsInclude(option: Option = {}): PluginOption {
   const regex = option.regex || DEFAULT_REGEX
   const configFile = option.configFile || 'vite.config.ts'
+  const marker = option.marker || DEFAULT_MARKER
 
   return {
     name: 'update-optimizeDeps-include',
@@ -79,10 +87,11 @@ function VitePluginAutoOptimizeDepsInclude(option: Option = {}): PluginOption {
           return
         }
 
-        const range = findOptimizeIncludeRange(configContent)
+        const range = findOptimizeIncludeRange(configContent, marker)
         if (!range) {
           server.config.logger.warn(
-            `[update-optimizeDeps-include] 未在 ${configFile} 中找到 optimizeDeps.include 数组`,
+            `[update-optimizeDeps-include] 未在 ${configFile} 中找到标记 "${marker}"，`
+            + `请检查：配置文件路径是否正确，或是否忘记在 include 数组上方添加 ${marker} 注释`,
           )
           return
         }
@@ -130,53 +139,28 @@ function VitePluginAutoOptimizeDepsInclude(option: Option = {}): PluginOption {
 }
 
 /**
- * 定位 optimizeDeps.include 数组的 [ 起始位置和 ] 结束位置
- * 策略：遍历所有 include: [...]，通过数组内容特征排除文件路径类的 include（如 AutoImport）
+ * 找到 marker 注释后第一个 [ 到其匹配的 ] 的范围
  */
-function findOptimizeIncludeRange(content: string) {
-  let searchFrom = 0
+function findOptimizeIncludeRange(content: string, marker: string) {
+  const markerIndex = content.indexOf(marker)
+  if (markerIndex === -1) return null
 
-  while (true) {
-    const match = content.slice(searchFrom).match(/include\s*:\s*\[/)
-    if (!match) return null
+  const bracketStart = content.indexOf('[', markerIndex + marker.length)
+  if (bracketStart === -1) return null
 
-    const bracketStart = searchFrom + match.index! + match[0].length
-    const bracketEnd = findClosingBracket(content, bracketStart)
-    if (bracketEnd === -1) return null
-
-    const items = content
-      .slice(bracketStart, bracketEnd)
-      .split(',')
-      .map(s => s.replace(/['"`]/g, '').trim())
-      .filter(Boolean)
-
-    // 判断是否是文件路径类 include（如 AutoImport/Components 的 src/** /*.vue）
-    const looksLikeFilePaths = items.some(item =>
-      item.includes('*') || item.includes('{') || item.startsWith('.'),
-    )
-
-    if (!looksLikeFilePaths) {
-      const lineStart = content.lastIndexOf('\n', searchFrom + match.index!) + 1
-      const indent = searchFrom + match.index! - lineStart
-      return { startIndex: bracketStart, endIndex: bracketEnd, indent }
-    }
-
-    // 是文件路径，继续找下一个 include
-    searchFrom = bracketStart + 1
-  }
-}
-
-/** 从 [ 之后开始，找匹配的 ] */
-function findClosingBracket(content: string, start: number) {
   let depth = 0
-  for (let i = start; i < content.length; i++) {
+  for (let i = bracketStart + 1; i < content.length; i++) {
     if (content[i] === '[') depth++
     if (content[i] === ']') {
-      if (depth === 0) return i
+      if (depth === 0) {
+        const lineStart = content.lastIndexOf('\n', markerIndex) + 1
+        const indent = markerIndex - lineStart
+        return { startIndex: bracketStart + 1, endIndex: i, indent }
+      }
       depth--
     }
   }
-  return -1
+  return null
 }
 
 export default VitePluginAutoOptimizeDepsInclude
