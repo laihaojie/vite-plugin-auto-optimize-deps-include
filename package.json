@@ -21,20 +21,21 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
     "./src/*": "./src/*"
   },
   "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
+    "build:tsup": "tsup",
     "release": "git add . && npx bumpp patch -y --commit --push --all --tag && npm publish --registry https://registry.npmjs.org",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
@@ -48,6 +49,7 @@
     "bumpp": "^10.1.0",
     "eslint": "^9.22.0",
     "nodemon": "^3.1.9",
+    "tsdown": "^0.22.0",
     "tsup": "^8.4.0",
     "typescript": "^5.8.2",
     "vite": "^6.2.2"
